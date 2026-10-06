@@ -51,6 +51,8 @@ Keys are stored in `chrome.storage.local` and are sent only to the configured Ge
 
 Chrome extension-local storage is not a secure secrets vault. Do not use this extension on a shared or untrusted browser profile. Screenshots contain the visible browser viewport and are sent to Gemini for analysis.
 
+The extension requests broad host access because Firefox does not grant `activeTab` to a button injected into a webpage. The extension uses that access only to capture the active visible tab when Check or automation is explicitly pressed.
+
 ## Controls
 
 - **Start** begins at the current test question.

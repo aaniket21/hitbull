@@ -18,7 +18,10 @@
     "type": "module"
   },
   "permissions": ["activeTab", "storage", "tabs"],
-  "host_permissions": ["https://generativelanguage.googleapis.com/*"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://generativelanguage.googleapis.com/*"
+  ],
   "action": {
     "default_popup": "./popup/popup.html"
   },

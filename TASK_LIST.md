@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed idempotent toolbar Start, automatic key selection for toolbar Check, and current radio-group detection for tests opened on any question number; 23 automated tests pass.
-Stopped at: Manual browser verification of the real Gemini response and question-selection flow.
-Next action needed: Reload the published extension and test the toolbar on Question 11 and a later question.
+Completed this session: Fixed the Firefox screenshot permission error and documented the required extension reload; 23 automated tests pass.
+Stopped at: Manual browser verification after re-adding the updated manifest.
+Next action needed: Remove and re-add the temporary Firefox add-on, then test Check and Start.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

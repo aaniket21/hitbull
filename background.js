@@ -43,8 +43,15 @@ async function saveStatus(state) {
 }
 
 async function captureTab(tabId) {
-	const tab = await chrome.tabs.get(tabId);
-	return chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+	try {
+		const tab = await chrome.tabs.get(tabId);
+		return await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+	} catch (error) {
+		if (/activeTab|permission/i.test(error.message || "")) {
+			throw new Error("Screenshot permission is unavailable. Reload the extension and grant site access, then try Check again.");
+		}
+		throw error;
+	}
 }
 
 async function answerQuestion(tabId, state, question) {
