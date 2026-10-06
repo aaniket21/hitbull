@@ -5,11 +5,7 @@ let readinessStartedAt = 0;
 let pageToolbar = null;
 let lastReportedQuestionSignature = "";
 let nextNavigationTimer = null;
-const logPrefix = "[Hitbullseye Automate]";
-
-function debugLog(message, details = {}) {
-    console.log(`${logPrefix} ${message}`, details);
-}
+function debugLog() {}
 
 function sendAutomationMessage(message) {
     debugLog(`Sending ${message.type}`, message.type === "SELECT_ANSWER"

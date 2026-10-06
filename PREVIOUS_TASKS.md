@@ -33,3 +33,4 @@
 - [x] Fixed NaN fallback, legacy answer-message compatibility, and normalized full option-text matching | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed null option numbers becoming zero and strengthened DOM extraction for full option text | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Added concrete worker-side selection resolution, legacy answer compatibility, and first-option fallback for empty model signals | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
+- [x] Removed extension-generated console logs and clarified the pause-before-Save-&-Next setting | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication

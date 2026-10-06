@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Added worker-side concrete selection resolution, legacy answer compatibility, and first-visible-option fallback for empty model signals; 24 automated tests pass.
+Completed this session: Removed extension console logs and clarified the functional pause-before-Save-&-Next setting; 24 automated tests pass.
 Stopped at: Manual browser verification with the updated Firefox extension loaded.
-Next action needed: Remove/re-add the temporary add-on, refresh the test page, and verify the console shows Resolved selection before radio selection.
+Next action needed: Reload the extension and verify the selected-to-navigation pause using the renamed setting.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

@@ -8,11 +8,7 @@ import { MESSAGE_TYPES, isMessageType } from "./lib/message-types.js";
 const runStore = createRunStore(chrome.storage.local);
 const keyManagers = new Map();
 const runEpochs = new Map();
-const logPrefix = "[Hitbullseye Automate]";
-
-function debugLog(message, details = {}) {
-	console.log(`${logPrefix} ${message}`, details);
-}
+function debugLog() {}
 
 function bumpRunEpoch(tabId) {
 	const nextEpoch = (runEpochs.get(tabId) || 0) + 1;
