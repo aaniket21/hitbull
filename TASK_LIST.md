@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Added end-to-end console diagnostics, active-question radio-group discovery, checked-input fallback, and content-message response tracing; 24 automated tests pass.
+Completed this session: Fixed Save & Next racing Gemini by waiting for changed question content instead of reused radio names; 24 automated tests pass.
 Stopped at: Manual browser verification with the browser console open.
-Next action needed: Reload the extension, run one question, and inspect `[Hitbullseye Automate]` logs if selection still fails.
+Next action needed: Reload the extension and verify the console shows New question content detected before the next Gemini request.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

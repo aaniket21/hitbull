@@ -3,6 +3,7 @@ let questionNumber = 0;
 let readinessTimer = null;
 let readinessStartedAt = 0;
 let pageToolbar = null;
+let lastReportedQuestionSignature = "";
 const logPrefix = "[Hitbullseye Automate]";
 
 function debugLog(message, details = {}) {
@@ -108,6 +109,14 @@ function getQuestionSnapshot() {
     };
 }
 
+function getQuestionSignature() {
+    const question = getQuestionSnapshot();
+    return JSON.stringify({
+        text: question.questionText,
+        options: question.options.map((option) => `${option.value}|${option.label}`),
+    });
+}
+
 function getNextButton() {
     return document.querySelector("#main_div > div.tableWidthPercent > div.onlineTestLeftDiv > div.qnav > span.saveNextButton > a")
         || [...document.querySelectorAll("a,button")].find((element) => /save\s*&?\s*next|next/i.test(element.textContent));
@@ -121,8 +130,14 @@ function reportQuestionReady() {
     const question = getQuestionSnapshot();
     debugLog("Question readiness check", { questionNumber, optionCount: question.options.length, group: getOptionInputs()[0]?.name || null });
     if (question.options.length > 0) {
+        const signature = getQuestionSignature();
+        if (signature === lastReportedQuestionSignature) {
+            debugLog("Duplicate question readiness ignored", { questionNumber });
+            return;
+        }
+        lastReportedQuestionSignature = signature;
         clearTimeout(readinessTimer);
-        chrome.runtime.sendMessage({ type: "QUESTION_READY", question });
+        sendAutomationMessage({ type: "QUESTION_READY", question });
         return;
     }
 
@@ -199,28 +214,28 @@ function navigateNext(delayMs) {
         throw new Error("The next-question control was not found");
     }
 
-    const previousGroupName = getOptionInputs()[0]?.getAttribute("name") || "";
+    const previousSignature = getQuestionSignature();
     setTimeout(() => {
         if (!automationActive) {
             return;
         }
         questionNumber += 1;
         readinessStartedAt = Date.now();
-        debugLog("Clicking Save & Next", { questionNumber, previousGroupName });
+        debugLog("Clicking Save & Next", { questionNumber });
         nextButton.click();
-        waitForNextQuestion(previousGroupName);
+        waitForNextQuestion(previousSignature);
     }, Math.max(0, Number(delayMs) || 0));
 }
 
-function waitForNextQuestion(previousGroupName) {
+    function waitForNextQuestion(previousSignature) {
     if (!automationActive) {
         return;
     }
 
-    const currentGroupName = document.querySelector('input[type="radio"][name^="radio_"]')?.getAttribute("name") || "";
     const hasOptions = getOptionInputs().length > 0;
-    if (hasOptions && currentGroupName !== previousGroupName) {
-        debugLog("New question radio group detected", { previousGroupName, currentGroupName });
+    const currentSignature = hasOptions ? getQuestionSignature() : "";
+    if (hasOptions && currentSignature !== previousSignature) {
+        debugLog("New question content detected", { previousQuestionLength: previousSignature.length, currentQuestionLength: currentSignature.length });
         reportQuestionReady();
         return;
     }
@@ -239,7 +254,7 @@ function waitForNextQuestion(previousGroupName) {
         return;
     }
 
-    readinessTimer = setTimeout(() => waitForNextQuestion(previousGroupName), 250);
+    readinessTimer = setTimeout(() => waitForNextQuestion(previousSignature), 250);
 }
 
 function stopAutomation() {
@@ -264,6 +279,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             automationActive = true;
             if (message.reset) {
                 questionNumber = 0;
+                lastReportedQuestionSignature = "";
             }
             readinessStartedAt = Date.now();
             toast("Automation started");
