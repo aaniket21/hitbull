@@ -23,6 +23,30 @@ function bumpRunEpoch(tabId) {
 function getRunEpoch(tabId) {
 	return runEpochs.get(tabId) || 0;
 }
+
+function normalizeSelectionText(text) {
+	return String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function resolveSelection(answer, question) {
+	const options = question?.options || [];
+	const requestedNumber = Number(answer.optionNumber);
+	const text = normalizeSelectionText(answer.optionText);
+	const textIndex = text
+		? options.findIndex((option) => normalizeSelectionText(option.label) === text)
+		: -1;
+	const numberIndex = Number.isInteger(requestedNumber) && requestedNumber > 0 && requestedNumber <= options.length
+		? requestedNumber - 1
+		: -1;
+	const selectedIndex = numberIndex >= 0 ? numberIndex : textIndex >= 0 ? textIndex : 0;
+	const selectedOption = options[selectedIndex];
+
+	return {
+		optionNumber: selectedIndex + 1,
+		optionText: selectedOption?.label || answer.optionText || "",
+		selectedBy: numberIndex >= 0 ? "number" : textIndex >= 0 ? "text" : "first-option-fallback",
+	};
+}
 const defaultSettings = {
 	model: "gemini-3.5-flash-lite",
 	delayMs: 1500,
@@ -129,7 +153,14 @@ async function answerQuestion(tabId, state, question, epoch) {
 			keyManager.markSuccess(activeKey.id);
 			const answeredState = transitionRunState(state, "answer_received", { activeKeyId: activeKey.id });
 			await saveStatus(answeredState);
-			const response = await sendToTab(tabId, { type: MESSAGE_TYPES.SELECT_ANSWER, optionNumber: answer.optionNumber, optionText: answer.optionText });
+			const selection = resolveSelection(answer, question);
+			debugLog("Resolved selection", selection);
+			const response = await sendToTab(tabId, {
+				type: MESSAGE_TYPES.SELECT_ANSWER,
+				optionNumber: selection.optionNumber,
+				optionText: selection.optionText,
+				answer: selection.optionText || String(selection.optionNumber),
+			});
 			if (!response?.ok) {
 				throw new Error(response?.error || "The answer was not selected; navigation was blocked");
 			}

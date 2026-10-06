@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed null option numbers becoming 0 and strengthened full-text extraction across radio siblings, labels, table cells, and parents; 24 automated tests pass.
+Completed this session: Added worker-side concrete selection resolution, legacy answer compatibility, and first-visible-option fallback for empty model signals; 24 automated tests pass.
 Stopped at: Manual browser verification with the updated Firefox extension loaded.
-Next action needed: Remove/re-add the temporary add-on, refresh the test page, and verify answers such as 9:5 and 60 paise select correctly.
+Next action needed: Remove/re-add the temporary add-on, refresh the test page, and verify the console shows Resolved selection before radio selection.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md
