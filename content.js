@@ -4,6 +4,7 @@ let readinessTimer = null;
 let readinessStartedAt = 0;
 let pageToolbar = null;
 let lastReportedQuestionSignature = "";
+let nextNavigationTimer = null;
 const logPrefix = "[Hitbullseye Automate]";
 
 function debugLog(message, details = {}) {
@@ -79,7 +80,11 @@ function optionLabel(input) {
 
 function getOptionInputs() {
     const questionArea = document.querySelector("#main_div > div.tableWidthPercent > div.onlineTestLeftDiv");
-    const candidates = [...(questionArea || document).querySelectorAll('input[type="radio"][name^="radio_"]')];
+    const candidates = [...(questionArea || document).querySelectorAll('input[type="radio"][name^="radio_"]')]
+        .filter((input) => {
+            const style = window.getComputedStyle(input);
+            return input.getClientRects().length > 0 && style.display !== "none" && style.visibility !== "hidden";
+        });
     const groups = new Map();
     candidates.forEach((input) => {
         const name = input.getAttribute("name");
@@ -215,7 +220,8 @@ function navigateNext(delayMs) {
     }
 
     const previousSignature = getQuestionSignature();
-    setTimeout(() => {
+    nextNavigationTimer = setTimeout(() => {
+        nextNavigationTimer = null;
         if (!automationActive) {
             return;
         }
@@ -232,9 +238,11 @@ function navigateNext(delayMs) {
         return;
     }
 
-    const hasOptions = getOptionInputs().length > 0;
+    const nextOptions = getOptionInputs();
+    const hasOptions = nextOptions.length > 0;
     const currentSignature = hasOptions ? getQuestionSignature() : "";
-    if (hasOptions && currentSignature !== previousSignature) {
+    const hasStaleSelection = nextOptions.some((input) => input.checked);
+    if (hasOptions && currentSignature !== previousSignature && !hasStaleSelection) {
         debugLog("New question content detected", { previousQuestionLength: previousSignature.length, currentQuestionLength: currentSignature.length });
         reportQuestionReady();
         return;
@@ -260,6 +268,8 @@ function navigateNext(delayMs) {
 function stopAutomation() {
     automationActive = false;
     clearTimeout(readinessTimer);
+    clearTimeout(nextNavigationTimer);
+    nextNavigationTimer = null;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

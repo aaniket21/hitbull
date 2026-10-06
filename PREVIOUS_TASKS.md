@@ -27,3 +27,4 @@
 - [x] Added explicit four-step automation tracking, popup stage progress, and stop-on-error behavior | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Added end-to-end console diagnostics and robust active-question radio selection with checked-input fallback | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed navigation race by comparing question text/options and ignoring reused radio-group names and duplicate readiness events | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
+- [x] Fixed hidden radio groups, stale checked options, and delayed navigation cancellation during Stop/restart | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication

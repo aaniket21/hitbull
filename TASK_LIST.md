@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed Save & Next racing Gemini by waiting for changed question content instead of reused radio names; 24 automated tests pass.
+Completed this session: Fixed hidden-radio selection, stale checked-option races, and pending navigation cancellation on Stop; 24 automated tests pass.
 Stopped at: Manual browser verification with the browser console open.
-Next action needed: Reload the extension and verify the console shows New question content detected before the next Gemini request.
+Next action needed: Reload the extension and verify logs show one visible radio group per question.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md
