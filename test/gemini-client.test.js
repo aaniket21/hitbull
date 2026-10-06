@@ -15,12 +15,14 @@ test("sends a screenshot as inline image data and parses the answer", async () =
         apiKey: "secret-key",
         imageData: "data:image/png;base64,abc123",
         model: "gemini-test-model",
+        questionContext: { questionText: "Which option?", options: [{ answer: "1", label: "56" }] },
         fetchImpl,
     });
 
     assert.deepEqual(result, { questionDetected: true, answer: "3", confidence: 0.88 });
     assert.match(request.url, /models\/gemini-test-model:generateContent\?key=secret-key$/);
     const body = JSON.parse(request.options.body);
+    assert.match(body.contents[0].parts[0].text, /Which option/);
     assert.equal(body.contents[0].parts[1].inlineData.data, "abc123");
     assert.equal(body.contents[0].parts[1].inlineData.mimeType, "image/png");
 });

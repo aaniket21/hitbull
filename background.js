@@ -73,6 +73,7 @@ async function answerQuestion(tabId, state, question) {
 					apiKey: activeKey.key,
 					imageData,
 					model: settings.model,
+					questionContext: question,
 				});
 			}, {
 				retries: 2,
@@ -219,12 +220,20 @@ async function handleControl(tabId, action, details = {}) {
 
 async function handleActiveStart(tabId) {
 	const state = await runStore.load(tabId);
-	if (["armed", "waiting_question", "capturing", "waiting_answer", "selecting", "navigating"].includes(state.status)) {
+	if (state.status === "waiting_question") {
+		await sendToTab(tabId, { type: MESSAGE_TYPES.BEGIN_QUESTION, reset: false });
+		return { ok: true, result: "Automation started" };
+	}
+	if (["armed", "capturing", "waiting_answer", "selecting", "navigating"].includes(state.status)) {
 		return { ok: true, result: "Automation already running" };
 	}
 	if (state.status === "paused") {
 		await handleControl(tabId, "resume");
 		return { ok: true, result: "Automation resumed" };
+	}
+	if (state.status === "error") {
+		await handleControl(tabId, "retry");
+		return { ok: true, result: "Automation retried" };
 	}
 
 	const { keys } = await getSettings();

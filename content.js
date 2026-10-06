@@ -69,8 +69,10 @@ function getOptionInputs() {
 
 function getQuestionSnapshot() {
     const inputs = getOptionInputs();
+    const questionArea = document.querySelector("#main_div > div.tableWidthPercent > div.onlineTestLeftDiv");
     return {
         questionNumber,
+        questionText: questionArea?.innerText?.trim() || "",
         options: inputs.map((input, index) => ({
             answer: /^[a-z]$/i.test(input.value) ? input.value.toUpperCase() : String.fromCharCode(65 + index),
             value: input.value,

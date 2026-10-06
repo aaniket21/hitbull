@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed the Firefox screenshot permission error and documented the required extension reload; 23 automated tests pass.
-Stopped at: Manual browser verification after re-adding the updated manifest.
-Next action needed: Remove and re-add the temporary Firefox add-on, then test Check and Start.
+Completed this session: Fixed waiting-state Start recovery, added extracted question/options to Gemini requests, and added error-state retry; 23 automated tests pass.
+Stopped at: Manual browser verification of numeric answer selection.
+Next action needed: Reload the extension, click Start once, and verify the visible radio option is selected before Save & Next.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md
