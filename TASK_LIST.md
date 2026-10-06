@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed waiting-state Start recovery, added extracted question/options to Gemini requests, and added error-state retry; 23 automated tests pass.
-Stopped at: Manual browser verification of numeric answer selection.
-Next action needed: Reload the extension, click Start once, and verify the visible radio option is selected before Save & Next.
+Completed this session: Fixed continuous question processing by advancing worker state after Save & Next and waiting for a new radio group; 23 automated tests pass.
+Stopped at: Manual browser verification across Question 2 and later.
+Next action needed: Reload the extension, click Start once, and verify every question is selected before Save & Next.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

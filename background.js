@@ -112,7 +112,11 @@ async function answerQuestion(tabId, state, question) {
 }
 
 async function handleQuestionReady(tabId, message) {
-	const state = await runStore.load(tabId);
+	let state = await runStore.load(tabId);
+	if (state.status === "navigating") {
+		state = transitionRunState(state, "next_question");
+		await saveStatus(state);
+	}
 	if (state.status !== "waiting_question") {
 		return;
 	}

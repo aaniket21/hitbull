@@ -162,6 +162,7 @@ function navigateNext(delayMs) {
         throw new Error("The next-question control was not found");
     }
 
+    const previousGroupName = getOptionInputs()[0]?.getAttribute("name") || "";
     setTimeout(() => {
         if (!automationActive) {
             return;
@@ -169,8 +170,37 @@ function navigateNext(delayMs) {
         questionNumber += 1;
         readinessStartedAt = Date.now();
         nextButton.click();
-        reportQuestionReady();
+        waitForNextQuestion(previousGroupName);
     }, Math.max(0, Number(delayMs) || 0));
+}
+
+function waitForNextQuestion(previousGroupName) {
+    if (!automationActive) {
+        return;
+    }
+
+    const currentGroupName = document.querySelector('input[type="radio"][name^="radio_"]')?.getAttribute("name") || "";
+    const hasOptions = getOptionInputs().length > 0;
+    if (hasOptions && currentGroupName !== previousGroupName) {
+        reportQuestionReady();
+        return;
+    }
+
+    if (document.querySelector("#activator")) {
+        stopAutomation();
+        chrome.runtime.sendMessage({ type: "QUESTION_COMPLETE" });
+        return;
+    }
+
+    if (Date.now() - readinessStartedAt > 15_000) {
+        stopAutomation();
+        const error = "The next question did not load within 15 seconds";
+        toast(error, "error");
+        chrome.runtime.sendMessage({ type: "QUESTION_ERROR", error });
+        return;
+    }
+
+    readinessTimer = setTimeout(() => waitForNextQuestion(previousGroupName), 250);
 }
 
 function stopAutomation() {

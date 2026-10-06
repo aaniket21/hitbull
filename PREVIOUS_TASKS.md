@@ -22,3 +22,4 @@
 - [x] Fixed toolbar Start/Check errors and dynamic radio-group selection for tests opened beyond Question 1 | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed Firefox `Missing activeTab permission` during screenshot capture by adding the required host permission and actionable error handling | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed waiting-state automation recovery and supplied extracted question/options to Gemini for reliable numeric selection | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
+- [x] Fixed continuous automation state progression and waited for a new radio group after each Save & Next navigation | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
