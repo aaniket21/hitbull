@@ -15,7 +15,10 @@ const defaultSettings = {
 };
 
 function sendToTab(tabId, message) {
-	return chrome.tabs.sendMessage(tabId, message).catch(() => undefined);
+	return chrome.tabs.sendMessage(tabId, message).catch((error) => ({
+		ok: false,
+		error: error.message || "The test page did not respond",
+	}));
 }
 
 function isTestUrl(url = "") {
@@ -92,8 +95,8 @@ async function answerQuestion(tabId, state, question) {
 			const answeredState = transitionRunState(state, "answer_received", { activeKeyId: activeKey.id });
 			await saveStatus(answeredState);
 			const response = await sendToTab(tabId, { type: MESSAGE_TYPES.SELECT_ANSWER, answer: answer.answer });
-			if (response?.ok === false) {
-				throw new Error(response.error || "The answer could not be selected");
+			if (!response?.ok) {
+				throw new Error(response?.error || "The answer was not selected; navigation was blocked");
 			}
 			return answeredState;
 		} catch (error) {

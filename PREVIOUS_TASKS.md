@@ -23,3 +23,4 @@
 - [x] Fixed Firefox `Missing activeTab permission` during screenshot capture by adding the required host permission and actionable error handling | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed waiting-state automation recovery and supplied extracted question/options to Gemini for reliable numeric selection | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed continuous automation state progression and waited for a new radio group after each Save & Next navigation | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
+- [x] Blocked navigation unless radio selection is confirmed and surfaced missing content-script responses | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication

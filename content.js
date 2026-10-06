@@ -117,7 +117,7 @@ function reportQuestionReady() {
 
 function selectAnswer(answer) {
     if (!automationActive) {
-        return;
+        throw new Error("Automation is not active; answer selection was blocked");
     }
 
     const options = getOptionInputs();
@@ -141,6 +141,11 @@ function selectAnswer(answer) {
     }
 
     input.click();
+    if (!input.checked) {
+        input.checked = true;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     if (!input.checked) {
         throw new Error(`Could not select answer ${normalizedAnswer}`);
     }
