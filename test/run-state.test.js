@@ -8,6 +8,7 @@ test("creates an idle run and starts it", () => {
 
     assert.equal(initialState.status, "idle");
     assert.equal(startedState.status, "waiting_question");
+    assert.equal(startedState.step, "capture");
     assert.equal(startedState.tabId, 42);
 });
 
@@ -23,6 +24,7 @@ test("pauses and resumes without losing progress", () => {
     const state = {
         ...createRunState(42),
         status: "waiting_answer",
+        step: "answer",
         currentQuestion: 3,
         completedCount: 2,
     };
@@ -32,6 +34,7 @@ test("pauses and resumes without losing progress", () => {
 
     assert.equal(pausedState.status, "paused");
     assert.equal(resumedState.status, "waiting_question");
+    assert.equal(resumedState.step, "answer");
     assert.equal(resumedState.currentQuestion, 3);
     assert.equal(resumedState.completedCount, 2);
 });
@@ -54,7 +57,22 @@ test("completes one question and retries an error without losing progress", () =
     state = transitionRunState(state, "retry");
 
     assert.equal(state.status, "waiting_question");
+    assert.equal(state.step, "capture");
     assert.equal(state.currentQuestion, 1);
     assert.equal(state.completedCount, 1);
     assert.equal(state.lastError, null);
+});
+
+test("tracks the four automation steps in order", () => {
+    let state = transitionRunState(createRunState(42), "start", { startedAt: 0 });
+    assert.equal(state.step, "capture");
+    state = transitionRunState(state, "question_ready");
+    state = transitionRunState(state, "capture_complete");
+    assert.equal(state.step, "answer");
+    state = transitionRunState(state, "answer_received", { activeKeyId: "one" });
+    assert.equal(state.step, "select");
+    state = transitionRunState(state, "answer_selected");
+    assert.equal(state.step, "next");
+    state = transitionRunState(state, "next_question");
+    assert.equal(state.step, "capture");
 });

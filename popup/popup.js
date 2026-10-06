@@ -202,12 +202,20 @@ function updateRangeLabels() {
 function renderState(state) {
     currentState = state;
     const label = state.status.replaceAll("_", " ");
+    const stepLabels = {
+        capture: "1/4 Capture screenshot",
+        answer: "2/4 Analyze answer",
+        select: "3/4 Select option",
+        next: "4/4 Save & Next",
+        error: "Error",
+        complete: "Complete",
+    };
     elements.statusText.textContent = label.charAt(0).toUpperCase() + label.slice(1);
     elements.progressText.textContent = state.status === "idle"
         ? "No active run"
         : state.status === "armed"
             ? "Waiting for the test page"
-        : `Question ${state.currentQuestion + 1} · ${state.completedCount} completed`;
+            : `${stepLabels[state.step] || "Processing"} · Question ${state.currentQuestion + 1}`;
     elements.statusDot.dataset.status = state.status;
     elements.errorText.textContent = state.lastError || "";
     elements.start.disabled = ["armed", "waiting_question", "capturing", "waiting_answer", "selecting", "navigating", "paused", "error"].includes(state.status);

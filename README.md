@@ -43,6 +43,15 @@ After installation in either browser, open a supported Hitbullseye test page, op
 8. Use **Pause**, **Resume**, or **Stop** at any time. Stop restores the previous window state when possible.
 9. Use **Retry** after a recoverable error.
 
+Each question follows four checked steps in order:
+
+1. Capture the visible screenshot.
+2. Ask Gemini for a numeric option answer.
+3. Select and verify the matching radio option.
+4. Click **Save & Next** only after selection succeeds.
+
+If any step fails, the run enters an error state and stays on the current question.
+
 The extension has no build step and is intended to remain loadable as an unpacked Manifest V3 extension.
 
 ## API Keys and Privacy

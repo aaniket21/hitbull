@@ -113,6 +113,12 @@
 - Expected: the extension waits for the next question to appear.
 - Expected: the next question is processed once, without duplicate API requests or duplicate clicks.
 
+### 4.4 Four-step workflow check
+- [ ] Open the popup while a run is active.
+- Expected: progress identifies the current stage as Capture screenshot, Analyze answer, Select option, or Save & Next.
+- Expected: the stage does not advance when Gemini fails or when the radio option cannot be checked.
+- Expected: Save & Next is clicked only after the selected radio input is visibly checked.
+
 ### 4.4 Progress display
 - [ ] Reopen the popup while the run is active.
 - Expected: the popup shows active status, question progress, completed count, and the last known key identifier/status.
