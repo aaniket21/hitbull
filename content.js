@@ -77,7 +77,20 @@ function injectPageToolbar() {
 
 function optionLabel(input) {
     const label = input.id ? document.querySelector(`label[for="${CSS.escape(input.id)}"]`) : null;
-    return (label?.textContent || input.parentElement?.textContent || input.value || "").trim();
+    return [
+        label?.textContent,
+        input.closest("td,li")?.innerText,
+        input.parentElement?.innerText,
+        input.value,
+    ].find((text) => text?.trim())?.trim() || "";
+}
+
+function normalizeOptionText(text) {
+    return String(text || "")
+        .toLowerCase()
+        .replace(/^(?:option|choice|answer)\s*\d+\s*[:.)-]?\s*/i, "")
+        .replace(/\s+/g, " ")
+        .trim();
 }
 
 function getOptionInputs() {
@@ -171,15 +184,19 @@ function selectAnswer(answer) {
     }
 
     const options = getOptionInputs();
-    const optionNumber = Number(answer?.optionNumber);
-    const optionText = String(answer?.optionText || answer?.answer || "").trim();
-    const normalizedText = optionText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const legacyAnswer = typeof answer === "string" ? answer : answer?.answer;
+    const rawOptionNumber = answer?.optionNumber ?? (/^(?:option|choice|answer)?\s*\d+$/i.test(String(legacyAnswer || "").trim())
+        ? String(legacyAnswer).replace(/\D/g, "")
+        : null);
+    const optionNumber = Number(rawOptionNumber);
+    const optionText = String(answer?.optionText || (rawOptionNumber === null ? legacyAnswer : "") || "").trim();
+    const normalizedText = normalizeOptionText(optionText);
     const numberInput = Number.isInteger(optionNumber) && optionNumber > 0
         ? options[optionNumber - 1]
         : null;
     const textInput = normalizedText
-        ? options.find((option) => optionLabel(option).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() === normalizedText
-            || option.value.toLowerCase().trim() === normalizedText)
+        ? options.find((option) => normalizeOptionText(optionLabel(option)) === normalizedText
+            || normalizeOptionText(option.value) === normalizedText)
         : null;
     const input = numberInput || textInput;
 

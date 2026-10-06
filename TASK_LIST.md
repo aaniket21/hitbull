@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Added dual Gemini signals, exact option-text matching, numeric fallback selection, and restart-safe stale-request suppression; 24 automated tests pass.
-Stopped at: Manual browser verification of text/number disagreement handling.
-Next action needed: Reload the extension and verify logs show textMatch, numberMatch, and selectedBy for one question.
+Completed this session: Fixed NaN fallback, legacy answer-message compatibility, and full option-text normalization; 24 automated tests pass.
+Stopped at: Manual browser verification with the updated Firefox extension loaded.
+Next action needed: Remove/re-add the temporary add-on, refresh the test page, and verify a full-text answer selects its matching option.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md
