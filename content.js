@@ -85,9 +85,20 @@ function selectAnswer(answer) {
     }
 
     const options = getOptionInputs();
-    const normalizedAnswer = String(answer).trim().toUpperCase();
-    const index = normalizedAnswer.charCodeAt(0) - 65;
-    const input = options.find((option) => option.value.toUpperCase() === normalizedAnswer) || options[index];
+    const rawAnswer = String(answer).trim();
+    const normalizedAnswer = rawAnswer.toUpperCase();
+    const normalizedText = rawAnswer.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const numberMatch = normalizedText.match(/^(?:option|choice|answer)?\s*(\d+)$/);
+    const letterMatch = normalizedAnswer.match(/^(?:OPTION\s*)?([A-Z])$/);
+    const input = numberMatch
+        ? options[Number(numberMatch[1]) - 1]
+        : options.find((option, index) => {
+            const label = optionLabel(option).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+            return option.value.toUpperCase() === normalizedAnswer
+                || option.value.toUpperCase() === letterMatch?.[1]
+                || label === normalizedText
+                || index + 1 === Number(normalizedAnswer);
+        });
 
     if (!input) {
         throw new Error(`Answer ${normalizedAnswer} does not match a visible option`);

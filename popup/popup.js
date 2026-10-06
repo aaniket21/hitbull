@@ -115,7 +115,7 @@ async function testKey(id, button) {
 
     button.disabled = true;
     button.textContent = "...";
-    const response = await runtimeMessage({ type: "TEST_KEY", tabId: activeTabId, keyId: id });
+    const response = await runtimeMessage({ type: "TEST_SCREENSHOT", tabId: activeTabId, keyId: id });
     button.disabled = false;
     button.textContent = "Check";
     renderTestResult(response?.ok ? response.result : response?.error || "Check failed", response?.ok);

@@ -53,15 +53,22 @@
 - Expected: the removed key is no longer listed or used.
 
 ### 2.5 Test a valid key
-- [ ] Click **Test** beside a valid key.
-- Expected: the popup reports that the key is ready.
-- Expected: the key value is not shown in the success or error message.
+- [ ] Open a visible question and click **Check** beside a valid key.
+- Expected: the current screenshot is sent to Gemini.
+- Expected: the popup shows an answer and confidence response without changing the browser page.
+- Expected: the key value is not shown in the response.
 
 ### 2.6 Test an invalid key
 - [ ] Add or enable an invalid key.
-- [ ] Click **Test**.
+- [ ] Click **Check**.
 - Expected: a clear failure is shown.
 - Expected: the API key itself is not displayed in the error.
+
+### 2.7 Check with no question
+- [ ] Open the Hitbullseye dashboard or another page without a visible question.
+- [ ] Click **Check** beside an enabled key.
+- Expected: the popup shows `No question detected`.
+- Expected: no option is selected and the page does not navigate.
 
 ## 3. Settings
 

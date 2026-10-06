@@ -102,6 +102,10 @@ async function answerQuestion(tabId, state, question) {
 				delayMs: 250,
 			});
 
+			if (!answer.questionDetected) {
+				throw new Error("No question detected");
+			}
+
 			if (answer.confidence < Number(settings.confidence)) {
 				throw new Error(`Gemini confidence ${answer.confidence} is below the configured threshold`);
 			}
@@ -191,11 +195,6 @@ async function handlePageReady(tabId, message) {
 }
 
 async function handleScreenshotTest(tabId, keyId) {
-	const inspection = await sendToTab(tabId, { type: MESSAGE_TYPES.INSPECT_QUESTION });
-	if (!inspection?.questionDetected) {
-		return { ok: true, result: "No question detected" };
-	}
-
 	const { keys, settings } = await getSettings();
 	const keyEntry = keys.find((entry) => entry.id === keyId && entry.enabled !== false);
 	if (!keyEntry) {
@@ -208,6 +207,9 @@ async function handleScreenshotTest(tabId, keyId) {
 		imageData,
 		model: settings.model,
 	});
+	if (!answer.questionDetected) {
+		return { ok: true, result: "No question detected" };
+	}
 
 	return {
 		ok: true,

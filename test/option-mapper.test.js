@@ -17,3 +17,13 @@ test("rejects an answer that is not among discovered options", () => {
         /does not match a visible option/,
     );
 });
+
+test("maps an option number and exact option text", () => {
+    const options = [
+        { answer: "A", value: "a", label: "Paris" },
+        { answer: "B", value: "b", label: "London" },
+    ];
+
+    assert.deepEqual(findAnswerOption(options, "Option 2"), options[1]);
+    assert.deepEqual(findAnswerOption(options, "Paris"), options[0]);
+});
