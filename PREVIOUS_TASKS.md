@@ -31,3 +31,4 @@
 - [x] Added per-tab run generations to suppress stale requests and changed Gemini to prefer exact visible option text | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Added dual option number/text Gemini responses and deterministic number-first browser selection fallback | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
 - [x] Fixed NaN fallback, legacy answer-message compatibility, and normalized full option-text matching | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
+- [x] Fixed null option numbers becoming zero and strengthened DOM extraction for full option text | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication

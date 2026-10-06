@@ -77,12 +77,14 @@ function injectPageToolbar() {
 
 function optionLabel(input) {
     const label = input.id ? document.querySelector(`label[for="${CSS.escape(input.id)}"]`) : null;
-    return [
+    const candidates = [
         label?.textContent,
+        input.nextSibling?.textContent,
         input.closest("td,li")?.innerText,
         input.parentElement?.innerText,
         input.value,
-    ].find((text) => text?.trim())?.trim() || "";
+    ].filter((text) => text?.trim()).map((text) => text.trim());
+    return candidates.sort((left, right) => left.length - right.length)[0] || "";
 }
 
 function normalizeOptionText(text) {
@@ -188,15 +190,22 @@ function selectAnswer(answer) {
     const rawOptionNumber = answer?.optionNumber ?? (/^(?:option|choice|answer)?\s*\d+$/i.test(String(legacyAnswer || "").trim())
         ? String(legacyAnswer).replace(/\D/g, "")
         : null);
-    const optionNumber = Number(rawOptionNumber);
+    const optionNumber = rawOptionNumber === null || rawOptionNumber === ""
+        ? null
+        : Number(rawOptionNumber);
     const optionText = String(answer?.optionText || (rawOptionNumber === null ? legacyAnswer : "") || "").trim();
     const normalizedText = normalizeOptionText(optionText);
     const numberInput = Number.isInteger(optionNumber) && optionNumber > 0
         ? options[optionNumber - 1]
         : null;
     const textInput = normalizedText
-        ? options.find((option) => normalizeOptionText(optionLabel(option)) === normalizedText
-            || normalizeOptionText(option.value) === normalizedText)
+        ? options.find((option) => {
+            const label = normalizeOptionText(optionLabel(option));
+            return label === normalizedText
+                || label.includes(normalizedText)
+                || normalizedText.includes(label)
+                || normalizeOptionText(option.value) === normalizedText;
+        })
         : null;
     const input = numberInput || textInput;
 
@@ -211,7 +220,7 @@ function selectAnswer(answer) {
     });
 
     if (!input) {
-        throw new Error(`Gemini answer did not match a visible option: ${optionText || optionNumber}`);
+        throw new Error(`Gemini answer did not match a visible option: ${optionText || optionNumber || "empty answer"}`);
     }
 
     debugLog("Matched answer option", { name: input.name, value: input.value, checkedBefore: input.checked });
