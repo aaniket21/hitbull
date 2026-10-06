@@ -47,36 +47,6 @@ async function captureTab(tabId) {
 	return chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
 }
 
-async function enterFullscreen(tabId, state) {
-	const tab = await chrome.tabs.get(tabId);
-	const currentWindow = await chrome.windows.get(tab.windowId);
-	try {
-		await chrome.windows.update(tab.windowId, { state: "fullscreen" });
-	} catch {
-		return state;
-	}
-	return {
-		...state,
-		windowId: tab.windowId,
-		previousWindowState: currentWindow.state,
-		fullscreen: true,
-	};
-}
-
-async function leaveFullscreen(state) {
-	if (!state.fullscreen || state.windowId === null) {
-		return state;
-	}
-
-	try {
-		await chrome.windows.update(state.windowId, { state: state.previousWindowState || "normal" });
-	} catch {
-		// The browser window may have been closed while the run was active.
-	}
-
-	return { ...state, fullscreen: false };
-}
-
 async function answerQuestion(tabId, state, question) {
 	const { keys, settings } = await getSettings();
 	const keyManager = getKeyManager(tabId, keys);
@@ -170,8 +140,7 @@ async function handleQuestionComplete(tabId) {
 	}
 
 	const completedState = transitionRunState(state, "complete");
-	const restoredState = await leaveFullscreen(completedState);
-	await saveStatus(restoredState);
+	await saveStatus(completedState);
 	const { settings } = await getSettings();
 	if (settings.autoSubmit) {
 		await sendToTab(tabId, { type: MESSAGE_TYPES.SUBMIT_TEST });
@@ -188,8 +157,7 @@ async function handlePageReady(tabId, message) {
 		return;
 	}
 
-	let activeState = transitionRunState(state, "page_ready");
-	activeState = await enterFullscreen(tabId, activeState);
+	const activeState = transitionRunState(state, "page_ready");
 	await saveStatus(activeState);
 	await sendToTab(tabId, { type: "BEGIN_QUESTION", reset: true });
 }
@@ -225,18 +193,12 @@ async function handleQuestionError(tabId, message) {
 	}
 
 	const errorState = transitionRunState(state, "error", { message: message.error || "The question could not be processed" });
-	await saveStatus(await leaveFullscreen(errorState));
+	await saveStatus(errorState);
 }
 
 async function handleControl(tabId, action, details = {}) {
 	const state = await runStore.load(tabId);
 	let nextState = transitionRunState(state, action, details);
-	if (action === "start" && nextState.status === "waiting_question") {
-		nextState = await enterFullscreen(tabId, nextState);
-	}
-	if (action === "stop") {
-		nextState = await leaveFullscreen(nextState);
-	}
 	await saveStatus(nextState);
 
 	if ((action === "start" && nextState.status === "waiting_question") || action === "resume" || action === "retry") {
@@ -269,6 +231,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				keyManagers.delete(tabId);
 				const tab = await chrome.tabs.get(tabId);
 				await handleControl(tabId, "start", { armed: !isTestUrl(tab.url) });
+			} else if (message.type === MESSAGE_TYPES.START_ACTIVE) {
+				const { keys } = await getSettings();
+				if (!keys.some((entry) => entry.enabled !== false)) {
+					throw new Error("Add and enable a Gemini API key before starting");
+				}
+				keyManagers.delete(tabId);
+				await handleControl(tabId, "start", { armed: false });
 			} else if (message.type === MESSAGE_TYPES.TEST_SCREENSHOT) {
 				sendResponse(await handleScreenshotTest(tabId, message.keyId));
 				return;

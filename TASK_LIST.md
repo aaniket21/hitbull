@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed screenshot Check responses, flexible answer matching, no-question detection, dashboard arming, and published the repair with 23 passing automated tests.
+Completed this session: Removed fullscreen behavior, added the in-page Check/Start/Stop toolbar, enforced numeric Gemini answers, and validated 23 automated tests.
 Stopped at: Manual browser verification of the real Gemini response and question-selection flow.
-Next action needed: Reload the published extension and test Check on both a dashboard and a live question.
+Next action needed: Reload the published extension and test the in-page toolbar on a live question.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

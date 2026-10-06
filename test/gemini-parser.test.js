@@ -2,19 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { parseGeminiAnswer } from "../lib/gemini-parser.js";
 
-test("parses a valid Gemini answer object", () => {
-    assert.deepEqual(parseGeminiAnswer('{"answer":"B","confidence":0.95}'), {
+test("parses a numeric option answer", () => {
+    assert.deepEqual(parseGeminiAnswer('{"answer":"2","confidence":0.95}'), {
         questionDetected: true,
-        answer: "B",
+        answer: "2",
         confidence: 0.95,
-    });
-});
-
-test("accepts an option number or option text", () => {
-    assert.deepEqual(parseGeminiAnswer('{"questionDetected":true,"answer":"Option 2","confidence":0.91}'), {
-        questionDetected: true,
-        answer: "Option 2",
-        confidence: 0.91,
     });
 });
 
@@ -24,6 +16,13 @@ test("represents a screen without a question", () => {
         answer: "",
         confidence: 0,
     });
+});
+
+test("rejects a nonnumeric option answer", () => {
+    assert.throws(
+        () => parseGeminiAnswer('{"answer":"London","confidence":0.91}'),
+        /numeric option number/,
+    );
 });
 
 test("rejects malformed Gemini output", () => {

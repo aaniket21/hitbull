@@ -2,6 +2,7 @@ let automationActive = false;
 let questionNumber = 0;
 let readinessTimer = null;
 let readinessStartedAt = 0;
+let pageToolbar = null;
 
 function isTestPage() {
     return window.location.href.includes("onlinetest.hitbullseye.com/online_load");
@@ -9,7 +10,47 @@ function isTestPage() {
 
 setTimeout(() => {
     chrome.runtime.sendMessage({ type: "PAGE_READY", isTestPage: isTestPage() }).catch(() => undefined);
+    injectPageToolbar();
 }, 0);
+
+function injectPageToolbar() {
+    if (!isTestPage() || document.getElementById("hitbullseye-helper-toolbar")) {
+        return;
+    }
+
+    pageToolbar = document.createElement("aside");
+    pageToolbar.id = "hitbullseye-helper-toolbar";
+    pageToolbar.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:2147483647;display:flex;align-items:center;gap:6px;padding:8px;background:#17252b;color:#fff;border:1px solid #3d6257;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.25);font:12px Arial,sans-serif";
+
+    const status = document.createElement("span");
+    status.textContent = "Ready";
+    status.style.cssText = "max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+
+    const createButton = (label, handler) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.style.cssText = "border:0;border-radius:5px;padding:6px 9px;background:#bfe9d1;color:#173b2f;cursor:pointer;font:11px Arial,sans-serif";
+        button.addEventListener("click", handler);
+        return button;
+    };
+
+    const sendToolbarMessage = async (message, loadingText, successText = "Done") => {
+        status.textContent = loadingText;
+        try {
+            const response = await chrome.runtime.sendMessage(message);
+            status.textContent = response?.ok ? response.result || successText : response?.error || "Request failed";
+        } catch (error) {
+            status.textContent = error.message;
+        }
+    };
+
+    const checkButton = createButton("Check", () => sendToolbarMessage({ type: "TEST_SCREENSHOT" }, "Checking..."));
+    const startButton = createButton("Start", () => sendToolbarMessage({ type: "START_ACTIVE" }, "Starting..."));
+    const stopButton = createButton("Stop", () => sendToolbarMessage({ type: "CONTROL", action: "stop" }, "Stopping...", "Stopped"));
+    pageToolbar.append(status, checkButton, startButton, stopButton);
+    document.documentElement.append(pageToolbar);
+}
 
 function optionLabel(input) {
     const label = input.id ? document.querySelector(`label[for="${CSS.escape(input.id)}"]`) : null;

@@ -39,7 +39,7 @@ After installation in either browser, open a supported Hitbullseye test page, op
 4. Choose the Gemini model and adjust delay or confidence.
 5. Click **Save** to store changed settings.
 6. Click **Start**. From the dashboard, the extension waits for the `online_load` test page; from an already-open test page, it starts immediately.
-7. When the test page opens, the extension attempts to enter fullscreen, captures each visible question, asks Gemini, selects the returned option, and moves to the next question.
+7. When the test page opens, the extension keeps the normal browser window, captures each visible question, asks Gemini for a numeric option, selects it, and moves to the next question.
 8. Use **Pause**, **Resume**, or **Stop** at any time. Stop restores the previous window state when possible.
 9. Use **Retry** after a recoverable error.
 
