@@ -58,20 +58,13 @@ function optionLabel(input) {
 }
 
 function getOptionInputs() {
-    const expectedName = `radio_${questionNumber + 1}`;
-    const expectedOptions = [...document.querySelectorAll(`input[type="radio"][name="${expectedName}"]`)];
-    if (expectedOptions.length > 0) {
-        return expectedOptions;
-    }
-
-    if (questionNumber > 0) {
+    const firstRadio = document.querySelector('input[type="radio"][name^="radio_"]');
+    if (!firstRadio) {
         return [];
     }
 
-    const firstGroup = document.querySelector('input[type="radio"][name^="radio_"]')?.getAttribute("name");
-    return firstGroup
-        ? [...document.querySelectorAll(`input[type="radio"][name="${CSS.escape(firstGroup)}"]`)]
-        : [];
+    const currentGroup = firstRadio.getAttribute("name");
+    return [...document.querySelectorAll(`input[type="radio"][name="${CSS.escape(currentGroup)}"]`)];
 }
 
 function getQuestionSnapshot() {

@@ -164,9 +164,10 @@ async function handlePageReady(tabId, message) {
 
 async function handleScreenshotTest(tabId, keyId) {
 	const { keys, settings } = await getSettings();
-	const keyEntry = keys.find((entry) => entry.id === keyId && entry.enabled !== false);
+	const keyEntry = keys.find((entry) => entry.id === keyId && entry.enabled !== false)
+		|| keys.find((entry) => entry.enabled !== false);
 	if (!keyEntry) {
-		return { ok: false, error: "Select an enabled Gemini key first" };
+		return { ok: false, error: "Add and enable a Gemini API key first" };
 	}
 
 	const imageData = await captureTab(tabId);
@@ -209,6 +210,26 @@ async function handleControl(tabId, action, details = {}) {
 	}
 }
 
+async function handleActiveStart(tabId) {
+	const state = await runStore.load(tabId);
+	if (["armed", "waiting_question", "capturing", "waiting_answer", "selecting", "navigating"].includes(state.status)) {
+		return { ok: true, result: "Automation already running" };
+	}
+	if (state.status === "paused") {
+		await handleControl(tabId, "resume");
+		return { ok: true, result: "Automation resumed" };
+	}
+
+	const { keys } = await getSettings();
+	if (!keys.some((entry) => entry.enabled !== false)) {
+		throw new Error("Add and enable a Gemini API key before starting");
+	}
+
+	keyManagers.delete(tabId);
+	await handleControl(tabId, "start", { armed: false });
+	return { ok: true, result: "Automation started" };
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	const tabId = message.tabId ?? sender.tab?.id;
 	if (!tabId) {
@@ -232,12 +253,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				const tab = await chrome.tabs.get(tabId);
 				await handleControl(tabId, "start", { armed: !isTestUrl(tab.url) });
 			} else if (message.type === MESSAGE_TYPES.START_ACTIVE) {
-				const { keys } = await getSettings();
-				if (!keys.some((entry) => entry.enabled !== false)) {
-					throw new Error("Add and enable a Gemini API key before starting");
-				}
-				keyManagers.delete(tabId);
-				await handleControl(tabId, "start", { armed: false });
+				sendResponse(await handleActiveStart(tabId));
+				return;
 			} else if (message.type === MESSAGE_TYPES.TEST_SCREENSHOT) {
 				sendResponse(await handleScreenshotTest(tabId, message.keyId));
 				return;

@@ -19,3 +19,4 @@
 - [x] Published the project to `https://github.com/aaniket21/hitbull.git` on `main` | Date: 2026-10-07 | Model: GitHub Copilot | Commit: `e57decb`
 - [x] Fixed Check screenshot responses, no-question detection, flexible option mapping, and published the repair | Date: 2026-10-07 | Model: GitHub Copilot | Commit: `b10c959`
 - [x] Removed fullscreen behavior, added in-page controls, and enforced numeric Gemini option answers | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
+- [x] Fixed toolbar Start/Check errors and dynamic radio-group selection for tests opened beyond Question 1 | Date: 2026-10-07 | Model: GitHub Copilot | Commit: pending publication
