@@ -7,6 +7,11 @@ import { MESSAGE_TYPES, isMessageType } from "./lib/message-types.js";
 
 const runStore = createRunStore(chrome.storage.local);
 const keyManagers = new Map();
+const logPrefix = "[Hitbullseye Automate]";
+
+function debugLog(message, details = {}) {
+	console.log(`${logPrefix} ${message}`, details);
+}
 const defaultSettings = {
 	model: "gemini-3.5-flash-lite",
 	delayMs: 1500,
@@ -15,10 +20,16 @@ const defaultSettings = {
 };
 
 function sendToTab(tabId, message) {
-	return chrome.tabs.sendMessage(tabId, message).catch((error) => ({
-		ok: false,
-		error: error.message || "The test page did not respond",
-	}));
+	debugLog(`Sending ${message.type} to tab`, { tabId });
+	return chrome.tabs.sendMessage(tabId, message)
+		.then((response) => {
+			debugLog(`Tab response for ${message.type}`, response || {});
+			return response;
+		})
+		.catch((error) => {
+			debugLog(`Tab message failed: ${message.type}`, { error: error.message });
+			return { ok: false, error: error.message || "The test page did not respond" };
+		});
 }
 
 function isTestUrl(url = "") {
@@ -58,6 +69,7 @@ async function captureTab(tabId) {
 }
 
 async function answerQuestion(tabId, state, question) {
+	debugLog("Starting answer workflow", { tabId, questionNumber: question?.questionNumber, optionCount: question?.options?.length, step: state.step });
 	const { keys, settings } = await getSettings();
 	const keyManager = getKeyManager(tabId, keys);
 	let attempts = 0;
@@ -70,6 +82,7 @@ async function answerQuestion(tabId, state, question) {
 		}
 
 		try {
+			debugLog("Capturing screenshot", { tabId, keyId: activeKey.id });
 			const answer = await withRetries(async () => {
 				const imageData = await captureTab(tabId);
 				return requestGeminiAnswer({
@@ -82,6 +95,7 @@ async function answerQuestion(tabId, state, question) {
 				retries: 2,
 				delayMs: 250,
 			});
+			debugLog("Gemini answer received", { questionDetected: answer.questionDetected, answer: answer.answer, confidence: answer.confidence, keyId: activeKey.id });
 
 			if (!answer.questionDetected) {
 				throw new Error("No question detected");
@@ -98,8 +112,10 @@ async function answerQuestion(tabId, state, question) {
 			if (!response?.ok) {
 				throw new Error(response?.error || "The answer was not selected; navigation was blocked");
 			}
+			debugLog("Selection confirmed by content script", { answer: answer.answer });
 			return answeredState;
 		} catch (error) {
+			debugLog("Answer workflow failed", { message: error.message, retryable: Boolean(error.retryable), keyId: activeKey.id });
 			lastError = error;
 			if (error.retryable) {
 				keyManager.markFailure(activeKey.id);
@@ -116,6 +132,7 @@ async function answerQuestion(tabId, state, question) {
 
 async function handleQuestionReady(tabId, message) {
 	let state = await runStore.load(tabId);
+	debugLog("Question ready received", { tabId, status: state.status, step: state.step, questionNumber: message.question?.questionNumber });
 	if (state.status === "navigating") {
 		state = transitionRunState(state, "next_question");
 		await saveStatus(state);
@@ -139,6 +156,7 @@ async function handleQuestionReady(tabId, message) {
 
 async function handleAnswerSelected(tabId) {
 	const state = await runStore.load(tabId);
+	debugLog("Answer selected message received", { tabId, status: state.status, step: state.step });
 	if (state.status !== "selecting") {
 		return;
 	}
@@ -209,6 +227,7 @@ async function handleQuestionError(tabId, message) {
 	}
 
 	const errorState = transitionRunState(state, "error", { message: message.error || "The question could not be processed" });
+	debugLog("Question error stored", { error: message.error });
 	await saveStatus(errorState);
 }
 

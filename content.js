@@ -3,13 +3,32 @@ let questionNumber = 0;
 let readinessTimer = null;
 let readinessStartedAt = 0;
 let pageToolbar = null;
+const logPrefix = "[Hitbullseye Automate]";
+
+function debugLog(message, details = {}) {
+    console.log(`${logPrefix} ${message}`, details);
+}
+
+function sendAutomationMessage(message) {
+    debugLog(`Sending ${message.type}`, message.type === "SELECT_ANSWER" ? { answer: message.answer } : {});
+    return chrome.runtime.sendMessage(message)
+        .then((response) => {
+            debugLog(`Response for ${message.type}`, response || {});
+            return response;
+        })
+        .catch((error) => {
+            debugLog(`Message failed: ${message.type}`, { error: error.message });
+            return { ok: false, error: error.message };
+        });
+}
 
 function isTestPage() {
     return window.location.href.includes("onlinetest.hitbullseye.com/online_load");
 }
 
 setTimeout(() => {
-    chrome.runtime.sendMessage({ type: "PAGE_READY", isTestPage: isTestPage() }).catch(() => undefined);
+    debugLog("Content script loaded", { url: window.location.href, isTestPage: isTestPage() });
+    sendAutomationMessage({ type: "PAGE_READY", isTestPage: isTestPage() });
     injectPageToolbar();
 }, 0);
 
@@ -58,13 +77,21 @@ function optionLabel(input) {
 }
 
 function getOptionInputs() {
-    const firstRadio = document.querySelector('input[type="radio"][name^="radio_"]');
-    if (!firstRadio) {
-        return [];
-    }
+    const questionArea = document.querySelector("#main_div > div.tableWidthPercent > div.onlineTestLeftDiv");
+    const candidates = [...(questionArea || document).querySelectorAll('input[type="radio"][name^="radio_"]')];
+    const groups = new Map();
+    candidates.forEach((input) => {
+        const name = input.getAttribute("name");
+        if (!groups.has(name)) groups.set(name, []);
+        groups.get(name).push(input);
+    });
 
-    const currentGroup = firstRadio.getAttribute("name");
-    return [...document.querySelectorAll(`input[type="radio"][name="${CSS.escape(currentGroup)}"]`)];
+    const currentGroup = [...groups.entries()].sort((left, right) => right[1].length - left[1].length)[0];
+    debugLog("Discovered radio groups", {
+        groups: [...groups.entries()].map(([name, inputs]) => ({ name, count: inputs.length })),
+        selectedGroup: currentGroup?.[0] || null,
+    });
+    return currentGroup?.[1] || [];
 }
 
 function getQuestionSnapshot() {
@@ -92,6 +119,7 @@ function reportQuestionReady() {
     }
 
     const question = getQuestionSnapshot();
+    debugLog("Question readiness check", { questionNumber, optionCount: question.options.length, group: getOptionInputs()[0]?.name || null });
     if (question.options.length > 0) {
         clearTimeout(readinessTimer);
         chrome.runtime.sendMessage({ type: "QUESTION_READY", question });
@@ -121,6 +149,7 @@ function selectAnswer(answer) {
     }
 
     const options = getOptionInputs();
+    debugLog("Selecting answer", { answer, optionCount: options.length, optionNames: options.map((option) => option.name) });
     const rawAnswer = String(answer).trim();
     const normalizedAnswer = rawAnswer.toUpperCase();
     const normalizedText = rawAnswer.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -140,6 +169,7 @@ function selectAnswer(answer) {
         throw new Error(`Answer ${normalizedAnswer} does not match a visible option`);
     }
 
+    debugLog("Matched answer option", { answer: normalizedAnswer, name: input.name, value: input.value, checkedBefore: input.checked });
     input.click();
     if (!input.checked) {
         input.checked = true;
@@ -150,7 +180,8 @@ function selectAnswer(answer) {
         throw new Error(`Could not select answer ${normalizedAnswer}`);
     }
 
-    chrome.runtime.sendMessage({ type: "ANSWER_SELECTED" });
+    debugLog("Answer verified checked", { name: input.name, value: input.value, checked: input.checked });
+    sendAutomationMessage({ type: "ANSWER_SELECTED" });
 }
 
 function navigateNext(delayMs) {
@@ -159,6 +190,7 @@ function navigateNext(delayMs) {
     }
 
     const nextButton = getNextButton();
+    debugLog("Next button lookup", { found: Boolean(nextButton), text: nextButton?.textContent?.trim() || null });
     if (!nextButton) {
         if (document.querySelector("#activator")) {
             chrome.runtime.sendMessage({ type: "QUESTION_COMPLETE" });
@@ -174,6 +206,7 @@ function navigateNext(delayMs) {
         }
         questionNumber += 1;
         readinessStartedAt = Date.now();
+        debugLog("Clicking Save & Next", { questionNumber, previousGroupName });
         nextButton.click();
         waitForNextQuestion(previousGroupName);
     }, Math.max(0, Number(delayMs) || 0));
@@ -187,6 +220,7 @@ function waitForNextQuestion(previousGroupName) {
     const currentGroupName = document.querySelector('input[type="radio"][name^="radio_"]')?.getAttribute("name") || "";
     const hasOptions = getOptionInputs().length > 0;
     if (hasOptions && currentGroupName !== previousGroupName) {
+        debugLog("New question radio group detected", { previousGroupName, currentGroupName });
         reportQuestionReady();
         return;
     }
@@ -233,6 +267,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }
             readinessStartedAt = Date.now();
             toast("Automation started");
+            debugLog("Automation started", { reset: Boolean(message.reset), questionNumber });
             reportQuestionReady();
         } else if (message.type === "SELECT_ANSWER") {
             selectAnswer(message.answer);
