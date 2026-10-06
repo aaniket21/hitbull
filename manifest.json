@@ -1,0 +1,31 @@
+{
+  "name": "Hitbullseye Automate Tool",
+  "version": "2.0.0",
+  "homepage_url": "https://github.com/aaniket21/hitbull.git",
+  "description": "Attempt all the questions in a test on hitbullseye.com with a single click.",
+  "author": "Aniket Kumar",
+  "default_locale": "en",
+  "manifest_version": 3,
+  "icons": {
+    "16": "./images/icon16.png",
+    "32": "./images/icon32.png",
+    "48": "./images/icon48.png",
+    "128": "./images/icon128.png"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["activeTab", "storage", "tabs", "windows"],
+  "host_permissions": ["https://generativelanguage.googleapis.com/*"],
+  "action": {
+    "default_popup": "./popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.hitbullseye.com/*"],
+      "js": ["content.js", "toast.js"]
+    }
+  ]
+}

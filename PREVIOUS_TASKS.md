@@ -1,0 +1,17 @@
+# PREVIOUS TASKS (Completed)
+
+## Module: Project Planning
+- [x] Audited the existing extension implementation and documented its current architecture | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Defined the Hitbullseye Automate Tool v2 product requirements | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Created the phased implementation task list and handoff state | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+
+## Module: Foundation and Contracts
+- [x] Added a dependency-free Node test harness and Gemini response parser with malformed-output validation | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Added tested API-key rotation, cooldown, run-state persistence, and strict answer-option mapping | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+
+## Module: V2 Extension Workflow
+- [x] Implemented Gemini screenshot requests, key validation, bounded retry/backoff, Manifest V3 permissions, service-worker orchestration, content-script navigation, multi-key popup controls, persistence, and v2 documentation | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Validated 17 automated tests, JavaScript syntax, diagnostics, and manifest JSON | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Completed Phase 2 message protocol and page-state lifecycle coverage; automated suite now has 19 passing tests | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Added dedicated Pause/Resume behavior and created the live browser manual testing checklist | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
+- [x] Updated Gemini model defaults to 3.5 Flash-Lite and added Firefox Manifest V3 background compatibility | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)

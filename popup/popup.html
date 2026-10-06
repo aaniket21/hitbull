@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="popup.css" />
+    <script src="popup.js" type="module"></script>
+    <title>Hitbullseye Automation Tool</title>
+</head>
+
+<body>
+    <nav class="ex-navbar">
+        <img src="../images/icon48.png" alt="" class="ex-icon" />
+        <div>
+            <strong>Hitbullseye Automate</strong>
+            <span>Gemini question runner</span>
+        </div>
+    </nav>
+    <main>
+        <section class="status-panel" aria-live="polite">
+            <span class="status-dot" id="status_dot"></span>
+            <div>
+                <strong id="status_text">Ready</strong>
+                <small id="progress_text">No active run</small>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <h1>Gemini keys</h1>
+                </div>
+                <span class="key-count" id="key_count">0</span>
+            </div>
+            <div class="key-entry">
+                <input type="password" id="api_key" placeholder="Paste Gemini API key" autocomplete="off" />
+                <button class="icon-button" id="add_key" title="Add API key" aria-label="Add API key">+</button>
+            </div>
+            <div class="key-list" id="key_list"></div>
+            <p class="security-note">Stored locally in this browser.</p>
+            <p class="test-result" id="test_result" role="status"></p>
+        </section>
+
+        <section class="panel settings-panel">
+            <div class="section-heading">
+                <div>
+                    <h1>Run settings</h1>
+                </div>
+                <button class="save-button" id="save_settings" disabled>Save</button>
+            </div>
+            <label class="field-label" for="model">Gemini model</label>
+            <select class="text-input" id="model">
+                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
+                <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+            </select>
+            <div class="range-row">
+                <label class="field-label" for="delay">Question delay</label>
+                <output id="delay_value">1.5s</output>
+            </div>
+            <input type="range" id="delay" min="250" max="10000" value="1500" step="250" />
+            <div class="range-row">
+                <label class="field-label" for="confidence">Minimum confidence</label>
+                <output id="confidence_value">0%</output>
+            </div>
+            <input type="range" id="confidence" min="0" max="1" value="0" step="0.05" />
+            <label class="toggle-row" for="auto_submit">
+                <input type="checkbox" id="auto_submit" />
+                <span>Submit automatically after the final question</span>
+            </label>
+        </section>
+
+        <div class="btn-group">
+            <button class="ex-button primary" id="start">Start</button>
+            <button class="ex-button" id="pause">Pause</button>
+            <button class="ex-button" id="resume">Resume</button>
+            <button class="ex-button danger" id="stop">Stop</button>
+            <button class="ex-button" id="retry">Retry</button>
+        </div>
+        <p class="error-text" id="error_text" role="alert"></p>
+    </main>
+    <footer>
+        <span>Version 2.0.0</span>
+        <a href="https://ai.google.dev/gemini-api/docs">Gemini API docs</a>
+    </footer>
+</body>
+
+</html>
