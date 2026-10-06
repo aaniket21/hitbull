@@ -7,10 +7,21 @@ import { MESSAGE_TYPES, isMessageType } from "./lib/message-types.js";
 
 const runStore = createRunStore(chrome.storage.local);
 const keyManagers = new Map();
+const runEpochs = new Map();
 const logPrefix = "[Hitbullseye Automate]";
 
 function debugLog(message, details = {}) {
 	console.log(`${logPrefix} ${message}`, details);
+}
+
+function bumpRunEpoch(tabId) {
+	const nextEpoch = (runEpochs.get(tabId) || 0) + 1;
+	runEpochs.set(tabId, nextEpoch);
+	return nextEpoch;
+}
+
+function getRunEpoch(tabId) {
+	return runEpochs.get(tabId) || 0;
 }
 const defaultSettings = {
 	model: "gemini-3.5-flash-lite",
@@ -68,7 +79,7 @@ async function captureTab(tabId) {
 	}
 }
 
-async function answerQuestion(tabId, state, question) {
+async function answerQuestion(tabId, state, question, epoch) {
 	debugLog("Starting answer workflow", { tabId, questionNumber: question?.questionNumber, optionCount: question?.options?.length, step: state.step });
 	const { keys, settings } = await getSettings();
 	const keyManager = getKeyManager(tabId, keys);
@@ -96,6 +107,10 @@ async function answerQuestion(tabId, state, question) {
 				delayMs: 250,
 			});
 			debugLog("Gemini answer received", { questionDetected: answer.questionDetected, answer: answer.answer, confidence: answer.confidence, keyId: activeKey.id });
+			if (getRunEpoch(tabId) !== epoch) {
+				debugLog("Ignoring stale answer from previous run", { tabId, epoch, currentEpoch: getRunEpoch(tabId) });
+				return null;
+			}
 
 			if (!answer.questionDetected) {
 				throw new Error("No question detected");
@@ -103,6 +118,12 @@ async function answerQuestion(tabId, state, question) {
 
 			if (answer.confidence < Number(settings.confidence)) {
 				throw new Error(`Gemini confidence ${answer.confidence} is below the configured threshold`);
+			}
+
+			const latestState = await runStore.load(tabId);
+			if (latestState.status !== "waiting_answer") {
+				debugLog("Ignoring answer because run is no longer waiting for an answer", { status: latestState.status, step: latestState.step });
+				return null;
 			}
 
 			keyManager.markSuccess(activeKey.id);
@@ -132,6 +153,7 @@ async function answerQuestion(tabId, state, question) {
 
 async function handleQuestionReady(tabId, message) {
 	let state = await runStore.load(tabId);
+	const epoch = getRunEpoch(tabId);
 	debugLog("Question ready received", { tabId, status: state.status, step: state.step, questionNumber: message.question?.questionNumber });
 	if (state.status === "navigating") {
 		state = transitionRunState(state, "next_question");
@@ -146,8 +168,13 @@ async function handleQuestionReady(tabId, message) {
 		await saveStatus(capturingState);
 		const capturedState = transitionRunState(capturingState, "capture_complete");
 		await saveStatus(capturedState);
-		await answerQuestion(tabId, capturedState, message.question);
+		await answerQuestion(tabId, capturedState, message.question, epoch);
 	} catch (error) {
+		const latestState = await runStore.load(tabId);
+		if (getRunEpoch(tabId) !== epoch || ["stopped", "paused"].includes(latestState.status)) {
+			debugLog("Ignoring stale question error", { error: error.message, status: latestState.status });
+			return;
+		}
 		const errorState = transitionRunState(state, "error", { message: error.message });
 		await saveStatus(errorState);
 		await sendToTab(tabId, { type: "PAUSE_AUTOMATION" });
@@ -232,6 +259,7 @@ async function handleQuestionError(tabId, message) {
 }
 
 async function handleControl(tabId, action, details = {}) {
+	bumpRunEpoch(tabId);
 	const state = await runStore.load(tabId);
 	let nextState = transitionRunState(state, action, details);
 	await saveStatus(nextState);
@@ -247,6 +275,7 @@ async function handleControl(tabId, action, details = {}) {
 async function handleActiveStart(tabId) {
 	const state = await runStore.load(tabId);
 	if (state.status === "waiting_question") {
+		bumpRunEpoch(tabId);
 		await sendToTab(tabId, { type: MESSAGE_TYPES.BEGIN_QUESTION, reset: false });
 		return { ok: true, result: "Automation started" };
 	}

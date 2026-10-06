@@ -7,7 +7,7 @@ test("sends a screenshot as inline image data and parses the answer", async () =
     const fetchImpl = async (url, options) => {
         request = { url, options };
         return new Response(JSON.stringify({
-            candidates: [{ content: { parts: [{ text: '{"answer":"3","confidence":0.88}' }] } }],
+            candidates: [{ content: { parts: [{ text: '{"answer":"Option three","confidence":0.88}' }] } }],
         }), { status: 200, headers: { "content-type": "application/json" } });
     };
 
@@ -19,7 +19,7 @@ test("sends a screenshot as inline image data and parses the answer", async () =
         fetchImpl,
     });
 
-    assert.deepEqual(result, { questionDetected: true, answer: "3", confidence: 0.88 });
+    assert.deepEqual(result, { questionDetected: true, answer: "Option three", confidence: 0.88 });
     assert.match(request.url, /models\/gemini-test-model:generateContent\?key=secret-key$/);
     const body = JSON.parse(request.options.body);
     assert.match(body.contents[0].parts[0].text, /Which option/);

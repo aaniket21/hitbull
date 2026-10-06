@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Fixed hidden-radio selection, stale checked-option races, and pending navigation cancellation on Stop; 24 automated tests pass.
-Stopped at: Manual browser verification with the browser console open.
-Next action needed: Reload the extension and verify logs show one visible radio group per question.
+Completed this session: Added restart-safe run generations, exact option-text Gemini answers, and stale-request suppression; 24 automated tests pass.
+Stopped at: Manual browser verification after Stop and Start.
+Next action needed: Reload the extension, run several questions, Stop, then Start and verify the new run begins at the current question.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

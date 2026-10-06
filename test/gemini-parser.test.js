@@ -18,11 +18,12 @@ test("represents a screen without a question", () => {
     });
 });
 
-test("rejects a nonnumeric option answer", () => {
-    assert.throws(
-        () => parseGeminiAnswer('{"answer":"London","confidence":0.91}'),
-        /numeric option number/,
-    );
+test("accepts an exact option text answer", () => {
+    assert.deepEqual(parseGeminiAnswer('{"answer":"Processing data analytics","confidence":0.91}'), {
+        questionDetected: true,
+        answer: "Processing data analytics",
+        confidence: 0.91,
+    });
 });
 
 test("rejects malformed Gemini output", () => {
