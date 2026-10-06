@@ -6,9 +6,9 @@ Active Model: GitHub Copilot
 ## 🔁 LAST SESSION HANDOFF
 Model: GitHub Copilot
 Date: 2026-10-07
-Completed this session: Added restart-safe run generations, exact option-text Gemini answers, and stale-request suppression; 24 automated tests pass.
-Stopped at: Manual browser verification after Stop and Start.
-Next action needed: Reload the extension, run several questions, Stop, then Start and verify the new run begins at the current question.
+Completed this session: Added dual Gemini signals, exact option-text matching, numeric fallback selection, and restart-safe stale-request suppression; 24 automated tests pass.
+Stopped at: Manual browser verification of text/number disagreement handling.
+Next action needed: Reload the extension and verify logs show textMatch, numberMatch, and selectedBy for one question.
 
 ## 🔵 Phase 1 — Foundation and Contracts
 - [x] Define v2 requirements in PRD.md

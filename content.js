@@ -12,7 +12,9 @@ function debugLog(message, details = {}) {
 }
 
 function sendAutomationMessage(message) {
-    debugLog(`Sending ${message.type}`, message.type === "SELECT_ANSWER" ? { answer: message.answer } : {});
+    debugLog(`Sending ${message.type}`, message.type === "SELECT_ANSWER"
+        ? { optionNumber: message.optionNumber, optionText: message.optionText }
+        : {});
     return chrome.runtime.sendMessage(message)
         .then((response) => {
             debugLog(`Response for ${message.type}`, response || {});
@@ -169,27 +171,33 @@ function selectAnswer(answer) {
     }
 
     const options = getOptionInputs();
-    debugLog("Selecting answer", { answer, optionCount: options.length, optionNames: options.map((option) => option.name) });
-    const rawAnswer = String(answer).trim();
-    const normalizedAnswer = rawAnswer.toUpperCase();
-    const normalizedText = rawAnswer.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-    const numberMatch = normalizedText.match(/^(?:option|choice|answer)?\s*(\d+)$/);
-    const letterMatch = normalizedAnswer.match(/^(?:OPTION\s*)?([A-Z])$/);
-    const input = numberMatch
-        ? options[Number(numberMatch[1]) - 1]
-        : options.find((option, index) => {
-            const label = optionLabel(option).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-            return option.value.toUpperCase() === normalizedAnswer
-                || option.value.toUpperCase() === letterMatch?.[1]
-                || label === normalizedText
-                || index + 1 === Number(normalizedAnswer);
-        });
+    const optionNumber = Number(answer?.optionNumber);
+    const optionText = String(answer?.optionText || answer?.answer || "").trim();
+    const normalizedText = optionText.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const numberInput = Number.isInteger(optionNumber) && optionNumber > 0
+        ? options[optionNumber - 1]
+        : null;
+    const textInput = normalizedText
+        ? options.find((option) => optionLabel(option).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() === normalizedText
+            || option.value.toLowerCase().trim() === normalizedText)
+        : null;
+    const input = numberInput || textInput;
+
+    debugLog("Selecting answer", {
+        optionNumber,
+        optionText,
+        textMatch: Boolean(textInput),
+        numberMatch: Boolean(numberInput),
+        selectedBy: numberInput ? "number" : textInput ? "text" : "none",
+        optionCount: options.length,
+        optionNames: options.map((option) => option.name),
+    });
 
     if (!input) {
-        throw new Error(`Answer ${normalizedAnswer} does not match a visible option`);
+        throw new Error(`Gemini answer did not match a visible option: ${optionText || optionNumber}`);
     }
 
-    debugLog("Matched answer option", { answer: normalizedAnswer, name: input.name, value: input.value, checkedBefore: input.checked });
+    debugLog("Matched answer option", { name: input.name, value: input.value, checkedBefore: input.checked });
     input.click();
     if (!input.checked) {
         input.checked = true;

@@ -3,25 +3,28 @@ import assert from "node:assert/strict";
 import { parseGeminiAnswer } from "../lib/gemini-parser.js";
 
 test("parses a numeric option answer", () => {
-    assert.deepEqual(parseGeminiAnswer('{"answer":"2","confidence":0.95}'), {
+    assert.deepEqual(parseGeminiAnswer('{"optionNumber":2,"optionText":"88","confidence":0.95}'), {
         questionDetected: true,
-        answer: "2",
+        optionNumber: 2,
+        optionText: "88",
         confidence: 0.95,
     });
 });
 
 test("represents a screen without a question", () => {
-    assert.deepEqual(parseGeminiAnswer('{"questionDetected":false,"answer":"","confidence":0}'), {
+    assert.deepEqual(parseGeminiAnswer('{"questionDetected":false,"optionNumber":null,"optionText":"","confidence":0}'), {
         questionDetected: false,
-        answer: "",
+        optionNumber: null,
+        optionText: "",
         confidence: 0,
     });
 });
 
 test("accepts an exact option text answer", () => {
-    assert.deepEqual(parseGeminiAnswer('{"answer":"Processing data analytics","confidence":0.91}'), {
+    assert.deepEqual(parseGeminiAnswer('{"optionNumber":2,"optionText":"Processing data analytics","confidence":0.91}'), {
         questionDetected: true,
-        answer: "Processing data analytics",
+        optionNumber: 2,
+        optionText: "Processing data analytics",
         confidence: 0.91,
     });
 });

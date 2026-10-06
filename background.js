@@ -106,7 +106,7 @@ async function answerQuestion(tabId, state, question, epoch) {
 				retries: 2,
 				delayMs: 250,
 			});
-			debugLog("Gemini answer received", { questionDetected: answer.questionDetected, answer: answer.answer, confidence: answer.confidence, keyId: activeKey.id });
+			debugLog("Gemini answer received", { questionDetected: answer.questionDetected, optionNumber: answer.optionNumber, optionText: answer.optionText, confidence: answer.confidence, keyId: activeKey.id });
 			if (getRunEpoch(tabId) !== epoch) {
 				debugLog("Ignoring stale answer from previous run", { tabId, epoch, currentEpoch: getRunEpoch(tabId) });
 				return null;
@@ -129,7 +129,7 @@ async function answerQuestion(tabId, state, question, epoch) {
 			keyManager.markSuccess(activeKey.id);
 			const answeredState = transitionRunState(state, "answer_received", { activeKeyId: activeKey.id });
 			await saveStatus(answeredState);
-			const response = await sendToTab(tabId, { type: MESSAGE_TYPES.SELECT_ANSWER, answer: answer.answer });
+			const response = await sendToTab(tabId, { type: MESSAGE_TYPES.SELECT_ANSWER, optionNumber: answer.optionNumber, optionText: answer.optionText });
 			if (!response?.ok) {
 				throw new Error(response?.error || "The answer was not selected; navigation was blocked");
 			}
@@ -242,7 +242,7 @@ async function handleScreenshotTest(tabId, keyId) {
 
 	return {
 		ok: true,
-		result: `Answer ${answer.answer} · ${Math.round(answer.confidence * 100)}% confidence`,
+		result: `Answer ${answer.optionText || answer.optionNumber} · ${Math.round(answer.confidence * 100)}% confidence`,
 		answer,
 	};
 }
