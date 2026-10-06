@@ -17,3 +17,4 @@
 - [x] Updated Gemini model defaults to 3.5 Flash-Lite and added Firefox Manifest V3 background compatibility | Date: 2026-10-07 | Model: GitHub Copilot | Commit: not committed (workspace has no Git metadata)
 - [x] Implemented screenshot Check diagnostics, dashboard arming, test-page activation, fullscreen controls, explicit settings Save, and cleaned popup styling | Date: 2026-10-07 | Model: GitHub Copilot | Commit: `e57decb`
 - [x] Published the project to `https://github.com/aaniket21/hitbull.git` on `main` | Date: 2026-10-07 | Model: GitHub Copilot | Commit: `e57decb`
+- [x] Fixed Check screenshot responses, no-question detection, flexible option mapping, and published the repair | Date: 2026-10-07 | Model: GitHub Copilot | Commit: `b10c959`
